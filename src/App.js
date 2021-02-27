@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, Suspense } from "react";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { draco } from "drei";
+import { useLoader } from 'react-three-fiber'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import "./App.scss";
 //Components
 import Header from "./components/header";
@@ -107,13 +107,17 @@ function handleWheel(e) {
   console.log(e.camera);
   e.camera.visible = false
 }
+function Asset({ url }) {
+  const gltf = useLoader(GLTFLoader, url)
+  return <primitive object={gltf.scene} />
+}
 
 function Box(props) {
   const mesh = useRef();
   const [hovered, setHover] = useState(false);
   const [active, setActive] = useState(false);
 
-  useFrame(() => (mesh.current.rotation.x = mesh.current.rotation.y += 0.01))
+  // useFrame(() => (mesh.current.rotation.x = mesh.current.rotation.y += 0.01))
   
   return (
     <mesh
@@ -126,25 +130,62 @@ function Box(props) {
       onPointerOut={(e) => setHover(false)}
     >
       <boxBufferGeometry attach="geometry" args={[1, 1, 1]}/>
-      
+      <sphereBufferGeometry attach="geometry" args={[1, 16, 16]}/>
       <meshStandardMaterial attach="material" color={hovered ? 'hotpink' : 'orange'}/>
       
     </mesh>
   );
   
 }
+function Box2(props) {
+  const mesh = useRef();
+  const [hovered, setHover] = useState(false);
+  const [active, setActive] = useState(false);
+
+  // useFrame(() => (mesh.current.rotation.x += 0.01))
+  
+  return (
+    <mesh
+      {...props}
+      ref={mesh}
+      scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
+      onClick={(e) => setActive(!active)}
+      onPointerOver={(e) => setHover(true)}
+      onWheel={handleWheel}
+      onPointerOut={(e) => setHover(false)}
+    >
+      <boxBufferGeometry attach="geometry" args={[1, 1, 1]}/>
+      <meshStandardMaterial attach="material" color={hovered ? 'hotpink' : 'orange'}/>
+      <Suspense fallback>
+        <Asset url="/scene.gltf" />
+      </Suspense>
+    </mesh>
+  );
+  
+}
+function Rig({ mouse }) {
+  const { camera } = useThree()
+  useFrame(() => {
+    camera.position.x += (mouse.current[1] / 50 - camera.position.x) * 0.05
+    camera.position.y += (-mouse.current[1] / 50 - camera.position.y) * 0.05
+    camera.lookAt(0, 0, 0)
+  })
+  return null
+}
 
 export default function App() {
   // const domContent = useRef()
-
+  const mouse = useRef([0, 0])
   // const scrollArea = useRef();
   // const onScroll = (e) => (state.top.current)
 
   return (
-    <Canvas colorManagement>
+    <Canvas colorManagement camera={{ position: [100, 0, 50], fov: 75 }} onMouseMove={(e) => (mouse.current = [e.clientX - window.innerWidth / 2, e.clientY - window.innerHeight / 2])}>
       <ambientLight/>
-      <pointLight position={[10,10,10]}/>
-      <Box/>
+      <pointLight position={[100, 100, 100]}/>
+      <Box position={[-1.2, 0, 0]} />
+      <Box2 position={[1.2, 0, 0]} />
+      <Rig mouse={mouse} />
     </Canvas>
   );
 }
