@@ -137,6 +137,20 @@ function Box(props) {
   );
   
 }
+function movement(e) {
+console.log(e);
+    // case 38:
+    // cube.rotation.z -= 0.1;
+    // break;
+    // case 39:
+    // cube.rotation.x -= 0.1;
+    // break;
+    // case 40:
+    // cube.rotation.z += 0.1;
+    // break;
+  // }
+};
+
 function Box2(props) {
   const mesh = useRef();
   const [hovered, setHover] = useState(false);
@@ -149,13 +163,16 @@ function Box2(props) {
       {...props}
       ref={mesh}
       scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
-      onClick={(e) => setActive(!active)}
+      onClick={(e) => {
+        setActive(!active) 
+        console.log(movement(e))
+      }}
       onPointerOver={(e) => setHover(true)}
       onWheel={handleWheel}
       onPointerOut={(e) => setHover(false)}
     >
-      <boxBufferGeometry attach="geometry" args={[1, 1, 1]}/>
-      <meshStandardMaterial attach="material" color={hovered ? 'hotpink' : 'orange'}/>
+      {/* <boxBufferGeometry attach="geometry" args={[1, 1, 1]}/>
+      <meshStandardMaterial attach="material" color={hovered ? 'hotpink' : 'orange'}/> */}
       <Suspense fallback>
         <Asset url="/scene.gltf" />
       </Suspense>
@@ -166,8 +183,8 @@ function Box2(props) {
 function Rig({ mouse }) {
   const { camera } = useThree()
   useFrame(() => {
-    camera.position.x += (mouse.current[1] / 50 - camera.position.x) * 0.05
-    camera.position.y += (-mouse.current[1] / 50 - camera.position.y) * 0.05
+    // camera.position.x += (mouse.current[1] / 50 - camera.position.x) * 0.05
+    // camera.position.y += (-mouse.current[1] / 50 - camera.position.y) * 0.05
     camera.lookAt(0, 0, 0)
   })
   return null
@@ -180,10 +197,10 @@ export default function App() {
   // const onScroll = (e) => (state.top.current)
 
   return (
-    <Canvas colorManagement camera={{ position: [100, 0, 50], fov: 75 }} onMouseMove={(e) => (mouse.current = [e.clientX - window.innerWidth / 2, e.clientY - window.innerHeight / 2])}>
-      <ambientLight/>
-      <pointLight position={[100, 100, 100]}/>
-      <Box position={[-1.2, 0, 0]} />
+    <Canvas colorManagement camera={{ position: [80, 100, 0],  fov: 25 }} onPointerMove={(e) => (mouse.current = [e.clientX - window.innerWidth / 2, e.clientY - window.innerHeight / 2])}>
+      <ambientLight position={[0, 100, 0]}/>
+      <pointLight position={[0, 0, 0]} />
+      <Box position={[-1.2, 0, 0]}/>
       <Box2 position={[1.2, 0, 0]} />
       <Rig mouse={mouse} />
     </Canvas>
